@@ -259,6 +259,7 @@ gp2x_video_flip();
 }
 
 int curDelay     = 0 ;
+int delayIncrement = 0;
 int curDelay_inc = gp2x_timer_raw_second()/1000;
 int skCount = 0;
 int skRate  = 0;
@@ -368,38 +369,45 @@ void  NEWGPU_vSinc(void)
 
   gpuSkipUpdate();
 
-  if(curDelay>0)
-    gp2x_timer_delay(curDelay);
+  newtime = SDL_GetTicks();
 
-  newtime = gp2x_timer_raw();
-	if( (diffintime=newtime-systime) >= (gp2x_timer_raw_second()) ) // poll 2 times per second
-	{
-    vsincRate = (u64)(vsincRateCounter*100)*gp2x_timer_raw_second() / diffintime;
-    frameRate = (u64)(frameRateCounter*100)*gp2x_timer_raw_second() / diffintime;
-    realRate  = (u64)(frameRealCounter*100)*gp2x_timer_raw_second() / diffintime;
+  if(((curDelay>0) && (curDelay < 100)) && enableFrameLimit)
+  {
+	  while (SDL_GetTicks() < newtime+curDelay)
+		  SDL_GetTicks();
+	    //SDL_Delay(curDelay);
+  }
 
-    if(enableFrameLimit && frameRate)
-    {
-      int inc    = gp2x_timer_raw_second() > 1000 ? gp2x_timer_raw_second()/5000 : gp2x_timer_raw_second()/1000;
-      int target =(isPAL==0 ? 60 : 50) * 100;
-      int range  = target*5/100;
+  diffintime = newtime - systime;
+  vsincRate = 0;
+  frameRate = curDelay;
+  realRate = diffintime;
 
-      if(vsincRate>(target+range))
-      {
-        curDelay_inc = (curDelay_inc>0) ? (curDelay_inc+inc) : (-curDelay_inc);
-        curDelay    += curDelay_inc;
-      }
-      else
-      if(vsincRate<(target-range))
-      {
-        curDelay_inc = (curDelay_inc<0) ? (curDelay_inc-inc) : (-curDelay_inc);
-        curDelay    += curDelay_inc;
-      }
-    }
-    vsincRateCounter = 0;
-		frameRateCounter = 0;
-		frameRealCounter = 0;
-		systime = gp2x_timer_raw();
-	}
+  u32 dinc = 0;
+  u32 d = (isPAL?20:16);
+  if(enableFrameLimit)
+  {
+	  if (diffintime < d)
+	  {
+		  curDelay = d - diffintime;
+		  if (delayIncrement <= curDelay)
+		  {
+			  curDelay -= delayIncrement;
+			  delayIncrement=0;
+		  }
+		  else
+		  {
+			  dinc = delayIncrement-curDelay;
+			  curDelay -= delayIncrement;
+			  delayIncrement-=dinc;
+		  }
+	  }
+	  else
+	  {
+		  delayIncrement += (diffintime - d);
+		  curDelay = 0;
+	  }
+  }
+  systime = SDL_GetTicks();
 
 }
