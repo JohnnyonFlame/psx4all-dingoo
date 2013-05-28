@@ -3,7 +3,7 @@ ifndef DESKTOP
 endif
 
 all:
-	$(MAKE) -f Makefile.dingoo all
+	$(MAKE) -f Makefile.dingoo PREFIX=$(PREFIX) all
 
 clean:
 	$(MAKE) -f Makefile.dingoo clean
