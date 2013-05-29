@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "newGPU.h"
 #include "minimal.h"
 
@@ -260,10 +262,32 @@ gp2x_video_flip();
 
 u64 curDelay     = 0 ;
 u64 delayIncrement = 0;
+timespec time_a, time_b, timediff;
 int curDelay_inc = gp2x_timer_raw_second()/1000;
 int skCount = 0;
 int skRate  = 0;
 
+
+timespec tsSubtract(timespec time1, timespec time2)
+{
+    struct  timespec  result ;
+
+    if ((time1.tv_sec < time2.tv_sec) ||
+        ((time1.tv_sec == time2.tv_sec) &&
+         (time1.tv_nsec <= time2.tv_nsec))) {		/* TIME1 <= TIME2? */
+        result.tv_sec = result.tv_nsec = 0 ;
+    } else {						/* TIME1 > TIME2 */
+        result.tv_sec = time1.tv_sec - time2.tv_sec ;
+        if (time1.tv_nsec < time2.tv_nsec) {
+            result.tv_nsec = time1.tv_nsec + 1000000000L - time2.tv_nsec ;
+            result.tv_sec-- ;				/* Borrow a second. */
+        } else {
+            result.tv_nsec = time1.tv_nsec - time2.tv_nsec ;
+        }
+    }
+
+    return (result) ;
+}
 ///////////////////////////////////////////////////////////////////////////////
 void  gpuSkipUpdate()
 {
@@ -351,13 +375,22 @@ void  gpuSkipUpdate()
     skRate--;
   }
 
-  newtime = SDL_GetTicks()*1000;
+  clock_gettime(CLOCK_MONOTONIC, &time_a);
+  timediff = tsSubtract(time_a, time_b);
+  timespec Hz;
+  Hz.tv_nsec = (isPAL?20000000L:16666666L);
+  timespec sleep = tsSubtract(Hz,timediff);
+  if (enableFrameLimit && sleep.tv_sec < 1) //Make sure values are sane
+	  nanosleep (&sleep, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &time_b);
+
+  /*newtime = SDL_GetTicks()*1000;
 
   if(((curDelay>0) && (curDelay < 1000000)) && enableFrameLimit)
   {
 	  int a;
-	  while (SDL_GetTicks()*1000 < newtime+curDelay) {a++;}
-	    //SDL_Delay(curDelay);
+	  //while (SDL_GetTicks()*1000 < newtime+curDelay) {a++;}
+	    SDL_Delay(curDelay/1000);
 
 	  //printf("leftover %i %i %i\n", (SDL_GetTicks()*1000),newtime,curDelay);
 	  delayIncrement += curDelay-((SDL_GetTicks()*1000)-newtime);
@@ -395,7 +428,7 @@ void  gpuSkipUpdate()
 		  curDelay = 0;
 	  }
   }
-  systime = SDL_GetTicks()*1000;
+  systime = SDL_GetTicks()*1000;*/
 
 }
 
