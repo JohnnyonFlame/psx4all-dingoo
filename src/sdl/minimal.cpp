@@ -413,7 +413,7 @@ void gp2x_init(int ticks_per_second, int bpp, int rate, int bits, int stereo, in
 
 	if(SDL_MUSTLOCK(screen_real)) SDL_LockSurface(screen_real);
 #else
-	gp2x_sdlwrapper_screen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	gp2x_sdlwrapper_screen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE);
 	if (!gp2x_sdlwrapper_screen) {
 		DEBUGF("SDL_SetVideoMode failed: %s\n", SDL_GetError());
 		SDL_Quit();

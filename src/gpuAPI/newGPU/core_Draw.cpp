@@ -258,8 +258,8 @@ gp2x_video_flip();
 */
 }
 
-int curDelay     = 0 ;
-int delayIncrement = 0;
+u64 curDelay     = 0 ;
+u64 delayIncrement = 0;
 int curDelay_inc = gp2x_timer_raw_second()/1000;
 int skCount = 0;
 int skRate  = 0;
@@ -352,8 +352,8 @@ void  gpuSkipUpdate()
 ///////////////////////////////////////////////////////////////////////////////
 void  NEWGPU_vSinc(void)
 {
-	u32    newtime;
-	u32    diffintime = 0;
+	u64    newtime;
+	u64    diffintime = 0;
 
 	/*	NOTE: GP1 must have the interlace bit toggle here,
 		since it shouldn't be in readStatus as it was previously */
@@ -369,22 +369,27 @@ void  NEWGPU_vSinc(void)
 
   gpuSkipUpdate();
 
-  newtime = SDL_GetTicks();
+  newtime = SDL_GetTicks()*1000;
 
-  if(((curDelay>0) && (curDelay < 100)) && enableFrameLimit)
+  if(((curDelay>0) && (curDelay < 1000000)) && enableFrameLimit)
   {
-	  while (SDL_GetTicks() < newtime+curDelay)
-		  SDL_GetTicks();
+	  int a;
+	  while (SDL_GetTicks()*1000 < newtime+curDelay) {a++;}
 	    //SDL_Delay(curDelay);
+
+	  printf("leftover %i %i %i\n", (SDL_GetTicks()*1000),newtime,curDelay);
+	  delayIncrement += curDelay-((SDL_GetTicks()*1000)-newtime);
   }
 
+  u64 d = (isPAL?20000:16666);
+
   diffintime = newtime - systime;
-  vsincRate = 0;
+  vsincRate = delayIncrement;
   frameRate = curDelay;
   realRate = diffintime;
 
-  u32 dinc = 0;
-  u32 d = (isPAL?20:16);
+  u64 dinc = 0;
+
   if(enableFrameLimit)
   {
 	  if (diffintime < d)
@@ -408,6 +413,6 @@ void  NEWGPU_vSinc(void)
 		  curDelay = 0;
 	  }
   }
-  systime = SDL_GetTicks();
+  systime = SDL_GetTicks()*1000;
 
 }
