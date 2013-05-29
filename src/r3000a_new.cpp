@@ -188,6 +188,7 @@ void update_hw(u32 cycles)
 		UpdateZodKeys();
 
 		GPU_vSinc();
+		/* FRAMESKIP FIX */
 #ifndef IPHONE
 		SPU_async(Config.PsxType);
 #endif

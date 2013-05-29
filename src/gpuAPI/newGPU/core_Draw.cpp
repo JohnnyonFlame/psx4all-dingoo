@@ -267,6 +267,10 @@ int skRate  = 0;
 ///////////////////////////////////////////////////////////////////////////////
 void  gpuSkipUpdate()
 {
+
+	u64    newtime;
+	u64    diffintime = 0;
+
   ++frameRateCounter;
 
   isNewDisplay = false;
@@ -347,28 +351,6 @@ void  gpuSkipUpdate()
     skRate--;
   }
 
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void  NEWGPU_vSinc(void)
-{
-	u64    newtime;
-	u64    diffintime = 0;
-
-	/*	NOTE: GP1 must have the interlace bit toggle here,
-		since it shouldn't be in readStatus as it was previously */
-  GPU_GP1 ^= 0x80000000;
-
-  if ( (GPU_GP1&0x08000000) ) // dma transfer NO update posible...
-  		return;
-
-  if ( (GPU_GP1&0x00800000) ) // Display disabled
-  		return;
-
-  ++vsincRateCounter;
-
-  gpuSkipUpdate();
-
   newtime = SDL_GetTicks()*1000;
 
   if(((curDelay>0) && (curDelay < 1000000)) && enableFrameLimit)
@@ -377,7 +359,7 @@ void  NEWGPU_vSinc(void)
 	  while (SDL_GetTicks()*1000 < newtime+curDelay) {a++;}
 	    //SDL_Delay(curDelay);
 
-	  printf("leftover %i %i %i\n", (SDL_GetTicks()*1000),newtime,curDelay);
+	  //printf("leftover %i %i %i\n", (SDL_GetTicks()*1000),newtime,curDelay);
 	  delayIncrement += curDelay-((SDL_GetTicks()*1000)-newtime);
   }
 
@@ -414,5 +396,27 @@ void  NEWGPU_vSinc(void)
 	  }
   }
   systime = SDL_GetTicks()*1000;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void  NEWGPU_vSinc(void)
+{
+/*	u64    newtime;
+	u64    diffintime = 0;*/
+
+	/*	NOTE: GP1 must have the interlace bit toggle here,
+		since it shouldn't be in readStatus as it was previously */
+  GPU_GP1 ^= 0x80000000;
+
+  if ( (GPU_GP1&0x08000000) ) // dma transfer NO update posible...
+  		return;
+
+  if ( (GPU_GP1&0x00800000) ) // Display disabled
+  		return;
+
+  ++vsincRateCounter;
+  if (!skipCount)
+	  gpuSkipUpdate();
 
 }

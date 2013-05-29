@@ -370,6 +370,7 @@ extern void  gpuVideoOutput(void);
 void  NEWGPU_writeStatus(u32 data)
 {
   PROFILE_FENCE(dmaMemTime,dmaMemCount);
+  //printf("%02X\n", data>>24);
 
   switch (data >> 24) {
 		case 0x00:
@@ -400,7 +401,6 @@ void  NEWGPU_writeStatus(u32 data)
 		case 0x06:
 			DisplayArea[4] = data & 0x00000FFF; //(short)(data & 0x7ff);
 			DisplayArea[6] = (data & 0x00FFF000) >> 12; //(short)((data>>12) & 0xfff);
-			//gpuSkipUpdate();
 			break;
 		case 0x07:
 			DisplayArea[5] = data & 0x000003FF; //(short)(data & 0x3ff);
@@ -415,6 +415,12 @@ void  NEWGPU_writeStatus(u32 data)
 			DisplayArea[2] = HorizontalResolution[(GPU_GP1 >> 16) & 7];
 			DisplayArea[3] = VerticalResolution[(GPU_GP1 >> 19) & 3];
 	  		isPAL = (data & 0x08) ? 1 : 0; // if 1 - PAL mode, else NTSC
+
+	  		/*
+	  		 * Frameskip Hack. Might cause stuff to go dark in some games.
+	  		 */
+	  		if (skipCount)
+	  			gpuSkipUpdate();
 			break;
 		case 0x09:
 			OtherEnv[0x09] = data & 1;			//	gpub(?)
