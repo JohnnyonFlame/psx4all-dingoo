@@ -262,7 +262,7 @@ gp2x_video_flip();
 
 u64 curDelay     = 0 ;
 u64 delayIncrement = 0;
-timespec time_a, time_b, timediff;
+timespec time_a, time_b, s_sleep;
 int curDelay_inc = gp2x_timer_raw_second()/1000;
 int skCount = 0;
 int skRate  = 0;
@@ -375,13 +375,13 @@ void  gpuSkipUpdate()
     skRate--;
   }
 
+
   clock_gettime(CLOCK_MONOTONIC, &time_a);
-  timediff = tsSubtract(time_a, time_b);
-  timespec Hz;
-  Hz.tv_nsec = (isPAL?20000000L:16666666L);
-  timespec sleep = tsSubtract(Hz,timediff);
-  if (enableFrameLimit && sleep.tv_sec < 1) //Make sure values are sane
-	  nanosleep (&sleep, NULL);
+  s_sleep = tsSubtract((timespec){0, (isPAL?20000000L:16666666L)},tsSubtract(time_a, time_b));
+
+  if (enableFrameLimit && s_sleep.tv_sec < 1) //Make sure values are sane
+	  nanosleep (&s_sleep, NULL);
+
   clock_gettime(CLOCK_MONOTONIC, &time_b);
 
   /*newtime = SDL_GetTicks()*1000;
