@@ -428,7 +428,7 @@ s32 SelectGame()
 		case PSX4ALL_MENU_DEFAULT_STATE:
 			if( keys & GP2X_DOWN )
 			{
-				if( menu_pos < 3 ) menu_pos++;
+				if( menu_pos < 4 ) menu_pos++;
 			}
 			break;
 		case PSX4ALL_MENU_GPU_STATE:
@@ -466,7 +466,7 @@ s32 SelectGame()
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 20,	"BIOS OPTIONS");
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 30,	"FILE OPTIONS");
 			if (psx4all_emulating) gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 40, "RESUME EMULATION");
-			else gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 50,	"QUIT");
+			else gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 40,	"QUIT");
 			break;
 		case PSX4ALL_MENU_GPU_STATE:
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS +  0,
