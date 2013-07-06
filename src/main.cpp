@@ -55,7 +55,8 @@ void gp2x_sound_frame(void *blah, void *buff, int samples) {}
 #define PSX4ALL_MENU_DEFAULT_STATE	0
 #define PSX4ALL_MENU_GPU_STATE		1
 #define PSX4ALL_MENU_SPU_STATE		2
-#define PSX4ALL_MENU_GAMESTATE_STATE	3
+#define PSX4ALL_MENU_BIOS_STATE		3
+#define PSX4ALL_MENU_GAMESTATE_STATE	4
 
 /* EXTERNS FOR MENU SYSTEM	*/
 /* NEEDS A BETTER PLACE		*/
@@ -69,6 +70,7 @@ extern bool displayVideoMemory;
 extern bool activeNullGPU;
 extern int  skipCount;
 extern int  skipRate;
+int  biosVersion = 1; /* set the default to scph1001 */
 int  skipValue = 0;
 #ifdef IPHONE
 static int  skipCountTablePhone[4] 	= { 0,2,3,4 };
@@ -441,6 +443,12 @@ s32 SelectGame()
 				if( menu_pos < 1 ) menu_pos++;
 			}
 			break;
+		case PSX4ALL_MENU_BIOS_STATE:
+			if( keys & GP2X_DOWN )
+			{
+				if( menu_pos < 1 ) menu_pos++;
+			}
+			break;
 		case PSX4ALL_MENU_GAMESTATE_STATE:
 			if( keys & GP2X_DOWN )
 			{
@@ -455,9 +463,10 @@ s32 SelectGame()
 		case PSX4ALL_MENU_DEFAULT_STATE:
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0,	"GRAPHICS OPTIONS");
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 10,	"SOUND OPTIONS");
-			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 20,	"FILE OPTIONS");
-			if (psx4all_emulating) gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 30, "RESUME EMULATION");
-			else gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 30,	"QUIT");
+			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 20,	"BIOS OPTIONS");
+			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 30,	"FILE OPTIONS");
+			if (psx4all_emulating) gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 40, "RESUME EMULATION");
+			else gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 50,	"QUIT");
 			break;
 		case PSX4ALL_MENU_GPU_STATE:
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS +  0,
@@ -511,6 +520,54 @@ s32 SelectGame()
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0,	"SOUND IS %s", (iSoundMuted == 0 ? "ON" : "OFF"));
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 10,	"BACK");
 			break;
+		case PSX4ALL_MENU_BIOS_STATE:
+			switch(biosVersion)
+			{
+				case 0:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph1000 (Japanese)");
+				break;
+				case 1:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph1001 (North American)");
+				break;
+				case 2:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph1002 (European)");
+				break;
+				case 3:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph5500 (Japanese)");
+				break;
+				case 4:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph5501 (North American)");
+				break;
+				case 5:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph5502 (European)");
+				break;
+				case 6:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph7001 (North American)");
+				break;
+				case 7:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph7002 (European)");
+				break;
+				case 8:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph7003 (Asian)");
+				break;
+				case 9:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph7500 (Japanese)");
+				break;
+				case 10:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph7501 (North American)");
+				break;
+				case 11:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph7502 (European)");
+				break;
+				case 12:
+					gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0, "Bios file: scph7503 (Japanese updated)");
+				break;
+
+				default:
+				break;
+			}
+			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 10,	"BACK");
+			break;
 		case PSX4ALL_MENU_GAMESTATE_STATE:
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 0,	"SAVE GAME STATE" );
 			gp2x_printf(NULL, 80, PSX4ALL_MENU_START_POS + 10,	"LOAD GAME STATE");
@@ -537,10 +594,14 @@ s32 SelectGame()
 					menu_pos = 0;
 					break;
 				case 2:
-					menu_state = PSX4ALL_MENU_GAMESTATE_STATE;
+					menu_state = PSX4ALL_MENU_BIOS_STATE;
 					menu_pos = 0;
 					break;
 				case 3:
+					menu_state = PSX4ALL_MENU_GAMESTATE_STATE;
+					menu_pos = 0;
+					break;
+				case 4:
 					// clear screen so interlaced screens look ok
 					gp2x_video_RGB_clearscreen16();
 					return 0;
@@ -714,6 +775,83 @@ s32 SelectGame()
 #ifndef NOSOUND
 						iSoundMuted = !iSoundMuted;
 #endif
+					}
+					break;
+				case 1:
+					if( keys & GP2X_B )
+					{
+						menu_state = PSX4ALL_MENU_DEFAULT_STATE;
+						menu_pos = 0;
+					}
+					break;
+			}
+			if (keys & GP2X_L) {
+				menu_state = PSX4ALL_MENU_DEFAULT_STATE;
+				menu_pos = 0;
+			}
+			break;
+		case PSX4ALL_MENU_BIOS_STATE:
+			switch(menu_pos)
+			{
+				case 0:
+					if( keys & GP2X_B || keys & GP2X_RIGHT )
+					{
+						biosVersion++;
+					}
+					else if( keys & GP2X_LEFT)
+					{
+						biosVersion--;
+					}
+
+					if(biosVersion < 0)
+						biosVersion = 12;
+					if(biosVersion > 12)
+						biosVersion = 0;
+
+					switch(biosVersion)
+					{
+						case 0:
+							sprintf(Config.Bios, "/scph1000.bin");
+						break;
+						case 1:
+							sprintf(Config.Bios, "/scph1001.bin");
+						break;
+						case 2:
+							sprintf(Config.Bios, "/scph1002.bin");
+						break;
+						case 3:
+							sprintf(Config.Bios, "/scph5500.bin");
+						break;
+						case 4:
+							sprintf(Config.Bios, "/scph5501.bin");
+						break;
+						case 5:
+							sprintf(Config.Bios, "/scph5502.bin");
+						break;
+						case 6:
+							sprintf(Config.Bios, "/scph7001.bin");
+						break;
+						case 7:
+							sprintf(Config.Bios, "/scph7002.bin");
+						break;
+						case 8:
+							sprintf(Config.Bios, "/scph7003.bin");
+						break;
+						case 9:
+							sprintf(Config.Bios, "/scph7500.bin");
+						break;
+						case 10:
+							sprintf(Config.Bios, "/scph7501.bin");
+						break;
+						case 11:
+							sprintf(Config.Bios, "/scph7502.bin");
+						break;
+						case 12:
+							sprintf(Config.Bios, "/scph7503.bin");
+						break;
+
+						default:
+						break;
 					}
 					break;
 				case 1:
