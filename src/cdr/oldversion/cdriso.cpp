@@ -205,6 +205,7 @@ s32 CDR_open() {
 			SysPrintf("Couldn't allocate %ld bytes", filesize);
 			gp2x_timer_delay(3000);
 			cdHandle = NULL;
+			fclose(f);
 			return -1;
 		}
 
