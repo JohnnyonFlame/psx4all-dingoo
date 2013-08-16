@@ -30,7 +30,7 @@
 #include <stdarg.h>
 #include <SDL.h>
 
-#define DEBUG
+//#define DEBUG
 //#define RENDER_DOUBLE
 
 #ifdef DEBUG

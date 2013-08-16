@@ -1119,10 +1119,18 @@ int main(int argc, char *argv[])
 	Config.VSyncWA = 0;
 
 #if defined(PSP) || defined(SDL) || defined(IPHONE)
-    sprintf(Config.BiosDir, "%s/Media/ROMs/PSX/", appworkdir);
-    sprintf(Config.Bios, "scph1001.bin");
+	sprintf(Config.BiosDir, "%s/Media/ROMs/PSX/", appworkdir);
+	sprintf(Config.Bios, "scph1001.bin");
 	sprintf(Config.Mcd1, "mcd001.mcr");
 	sprintf(Config.Mcd2, "mcd002.mcr");
+#elif defined(HOME_DIR)
+	strcpy(gamepath, getenv("HOME"));
+	strcat(gamepath, "/.psx4all");
+	mkdir(gamepath, 0755); // create $HOME/.psx4all if doesn't exist
+	sprintf(Config.BiosDir, "%s", gamepath);
+	sprintf(Config.Bios, "/scph1001.bin");
+	sprintf(Config.Mcd1, "%s/mcd001.mcr", gamepath);
+	sprintf(Config.Mcd2, "%s/mcd002.mcr", gamepath);
 #else
 	sprintf(Config.BiosDir, "%s", gamepath);
 	sprintf(Config.Bios, "/scph1001.bin");

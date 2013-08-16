@@ -1,9 +1,10 @@
 ifndef DESKTOP
   PREFIX ?= /opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr
+  WITH_HOME = 1
 endif
 
 all:
-	$(MAKE) -f Makefile.dingoo PREFIX=$(PREFIX) all
+	$(MAKE) -f Makefile.dingoo PREFIX=$(PREFIX) WITH_HOME=$(WITH_HOME) all
 
 clean:
 	$(MAKE) -f Makefile.dingoo clean
